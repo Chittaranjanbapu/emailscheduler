@@ -1,0 +1,99 @@
+# ========================================
+# Node.js
+# ========================================
+
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ========================================
+# Environment Variables
+# ========================================
+
+# Important: Never upload secret credentials
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ========================================
+# Build Files
+# ========================================
+
+dist/
+build/
+out/
+
+# ========================================
+# Operating System Files
+# ========================================
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+
+# ========================================
+# Editor / IDE Files
+# ========================================
+
+# Visual Studio Code
+.vscode/
+
+# Visual Studio
+.vs/
+
+# JetBrains
+.idea/
+
+# ========================================
+# Temporary Files
+# ========================================
+
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ========================================
+# Coverage
+# ========================================
+
+coverage/
+
+# ========================================
+# Cache
+# ========================================
+
+.cache/
+.parcel-cache/
+
+# ========================================
+# Environment / Secrets
+# ========================================
+
+*.pem
+*.key
+
+# ========================================
+# Optional Upload Files
+# ========================================
+
+uploads/
+
+# ========================================
+# Miscellaneous
+# ========================================
+
+*.swp
+*.swo

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Mail Scheduler</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="topbar">
+
+        <div class="brand">
+            <div class="logo">✉</div>
+
+            <span>Mail Scheduler</span>
+        </div>
+
+
+        <button class="scheduled-nav" id="scheduledNav">
+
+            <span>Scheduled</span>
+
+            <span class="count-badge" id="scheduledCount">
+                0
+            </span>
+
+        </button>
+
+    </header>
+
+
+    <!-- ================= MAIN APP ================= -->
+
+    <main class="app-container">
+
+
+        <!-- ================= COMPOSE VIEW ================= -->
+
+        <section class="compose-view" id="composeView">
+
+            <div class="page-heading">
+
+                <div>
+
+                    <h1>New Scheduled Email</h1>
+
+                    <p>
+                        Compose your email and choose when it should be sent.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= EMAIL COMPOSER ================= -->
+
+            <div class="composer-card">
+
+
+                <!-- RECIPIENT -->
+
+                <div class="form-group">
+
+                    <label>
+                        To
+                    </label>
+
+
+                    <div class="recipient-box" id="recipientBox">
+
+                        <div id="recipientChips" class="recipient-chips"></div>
+
+
+                        <input
+                            type="email"
+                            id="recipientInput"
+                            placeholder="Type an email address..."
+                        >
+
+                    </div>
+
+
+                    <div class="recipient-actions">
+
+                        <button
+                            type="button"
+                            id="toggleCc"
+                            class="text-button"
+                        >
+                            CC
+                        </button>
+
+
+                        <span>·</span>
+
+
+                        <button
+                            type="button"
+                            id="toggleBcc"
+                            class="text-button"
+                        >
+                            BCC
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CC -->
+
+                <div class="form-group hidden" id="ccSection">
+
+                    <label>
+                        CC
+                    </label>
+
+
+                    <input
+                        type="email"
+                        class="form-input"
+                        id="ccInput"
+                        placeholder="Add CC recipients"
+                    >
+
+                </div>
+
+
+                <!-- BCC -->
+
+                <div class="form-group hidden" id="bccSection">
+
+                    <label>
+                        BCC
+                    </label>
+
+
+                    <input
+                        type="email"
+                        class="form-input"
+                        id="bccInput"
+                        placeholder="Add BCC recipients"
+                    >
+
+                </div>
+
+
+                <!-- SUBJECT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Subject
+                    </label>
+
+
+                    <input
+                        type="text"
+                        class="form-input"
+                        id="subjectInput"
+                        placeholder="Enter email subject"
+                    >
+
+                </div>
+
+
+                <!-- MESSAGE -->
+
+                <div class="form-group">
+
+                    <label>
+                        Message
+                    </label>
+
+
+                    <div class="editor-container">
+
+
+                        <!-- TOOLBAR -->
+
+                        <div class="editor-toolbar">
+
+                            <button
+                                type="button"
+                                data-command="bold"
+                                title="Bold"
+                            >
+                                <strong>B</strong>
+                            </button>
+
+
+                            <button
+                                type="button"
+                                data-command="italic"
+                                title="Italic"
+                            >
+                                <em>I</em>
+                            </button>
+
+
+                            <button
+                                type="button"
+                                data-command="underline"
+                                title="Underline"
+                            >
+                                <u>U</u>
+                            </button>
+
+
+                            <span class="toolbar-divider"></span>
+
+
+                            <button
+                                type="button"
+                                data-command="insertUnorderedList"
+                                title="Bullet List"
+                            >
+                                • List
+                            </button>
+
+
+                            <button
+                                type="button"
+                                data-command="insertOrderedList"
+                                title="Numbered List"
+                            >
+                                1. List
+                            </button>
+
+
+                            <span class="toolbar-divider"></span>
+
+
+                            <button
+                                type="button"
+                                id="linkButton"
+                                title="Insert Link"
+                            >
+                                🔗
+                            </button>
+
+                        </div>
+
+
+                        <!-- EDITOR -->
+
+                        <div
+                            class="message-editor"
+                            id="messageEditor"
+                            contenteditable="true"
+                            data-placeholder="Write your email..."
+                        ></div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- ATTACHMENTS -->
+
+                <div class="attachment-section">
+
+                    <label
+                        for="attachmentInput"
+                        class="attachment-button"
+                    >
+
+                        <span>📎</span>
+
+                        <span>
+                            Attach files
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="file"
+                        id="attachmentInput"
+                        multiple
+                        hidden
+                    >
+
+
+                    <div
+                        id="attachmentList"
+                        class="attachment-list"
+                    ></div>
+
+                </div>
+
+
+                <!-- DIVIDER -->
+
+                <div class="section-divider"></div>
+
+
+                <!-- ================= SCHEDULE ================= -->
+
+                <div class="schedule-section">
+
+
+                    <div class="schedule-heading">
+
+                        <h2>
+                            Schedule
+                        </h2>
+
+                        <p>
+                            Choose when this email should be sent.
+                        </p>
+
+                    </div>
+
+
+                    <!-- DATE + TIME -->
+
+                    <div class="schedule-grid">
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Date
+                            </label>
+
+
+                            <input
+                                type="date"
+                                class="form-input"
+                                id="scheduleDate"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Time
+                            </label>
+
+
+                            <input
+                                type="time"
+                                class="form-input"
+                                id="scheduleTime"
+                            >
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- TIMEZONE -->
+
+                    <div class="form-group timezone-group">
+
+                        <label>
+                            Timezone
+                        </label>
+
+
+                        <select
+                            id="timezone"
+                            class="form-input"
+                        >
+
+                            <option value="Asia/Kolkata">
+                                Asia/Kolkata (IST)
+                            </option>
+
+                            <option value="UTC">
+                                UTC
+                            </option>
+
+                            <option value="America/New_York">
+                                America/New_York
+                            </option>
+
+                            <option value="Europe/London">
+                                Europe/London
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SCHEDULE CONFIRMATION -->
+
+                    <div
+                        class="schedule-confirmation"
+                        id="scheduleConfirmation"
+                    >
+
+                        🕐 Select a date and time
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ================= ACTION BUTTONS ================= -->
+
+                <div class="action-buttons">
+
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="previewButton"
+                    >
+
+                        Preview
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        id="scheduleButton"
+                    >
+
+                        Schedule Email
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================= SCHEDULED VIEW ================= -->
+
+        <section
+            class="scheduled-view hidden"
+            id="scheduledView"
+        >
+
+
+            <div class="scheduled-header">
+
+                <button
+                    class="back-button"
+                    id="backButton"
+                >
+
+                    ← Back
+
+                </button>
+
+
+                <div>
+
+                    <h1>
+                        Scheduled Emails
+                    </h1>
+
+                    <p>
+                        Manage your upcoming emails.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- SCHEDULED LIST -->
+
+            <div
+                class="scheduled-list"
+                id="scheduledList"
+            ></div>
+
+
+            <!-- EMPTY STATE -->
+
+            <div
+                class="empty-state"
+                id="emptyState"
+            >
+
+                <div class="empty-icon">
+                    ✉
+                </div>
+
+
+                <h2>
+                    No scheduled emails
+                </h2>
+
+
+                <p>
+                    Your scheduled emails will appear here.
+                </p>
+
+
+                <button
+                    class="btn btn-primary"
+                    id="createEmailButton"
+                >
+
+                    Create Email
+
+                </button>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ================= PREVIEW MODAL ================= -->
+
+    <div
+        class="modal hidden"
+        id="previewModal"
+    >
+
+        <div class="modal-overlay"></div>
+
+
+        <div class="modal-content">
+
+
+            <!-- MODAL HEADER -->
+
+            <div class="modal-header">
+
+                <h2>
+                    Email Preview
+                </h2>
+
+
+                <button
+                    class="close-button"
+                    id="closePreview"
+                >
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+            <!-- PREVIEW BODY -->
+
+            <div
+                class="preview-body"
+                id="previewBody"
+            ></div>
+
+
+            <!-- MODAL FOOTER -->
+
+            <div class="modal-footer">
+
+
+                <button
+                    class="btn btn-secondary"
+                    id="editButton"
+                >
+
+                    Edit
+
+                </button>
+
+
+                <button
+                    class="btn btn-primary"
+                    id="confirmScheduleButton"
+                >
+
+                    Schedule Email
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="script.js"></script>
+
+</body>
+</html>
