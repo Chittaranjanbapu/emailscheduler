@@ -1,114 +1,74 @@
 /* =========================================
-   API CONFIGURATION
+   ASHVAD MAIL - COMPLETE JAVASCRIPT
 ========================================= */
 
-const API_URL =
-    "http://localhost:5000/api";
-
+const API_URL = "http://localhost:5000/api";
 
 /* =========================================
    ELEMENTS
 ========================================= */
 
-const recipientInput =
-    document.getElementById("recipientInput");
+const recipientInput = document.getElementById("recipientInput");
+const recipientBox = document.getElementById("recipientBox");
+const recipientChips = document.getElementById("recipientChips");
 
-const recipientBox =
-    document.getElementById("recipientBox");
+const toggleCc = document.getElementById("toggleCc");
+const toggleBcc = document.getElementById("toggleBcc");
 
-const recipientChips =
-    document.getElementById("recipientChips");
+const ccSection = document.getElementById("ccSection");
+const bccSection = document.getElementById("bccSection");
 
+const ccInput = document.getElementById("ccInput");
+const ccChips = document.getElementById("ccChips");
 
-const toggleCc =
-    document.getElementById("toggleCc");
+const bccInput = document.getElementById("bccInput");
+const bccChips = document.getElementById("bccChips");
 
-const toggleBcc =
-    document.getElementById("toggleBcc");
+const subjectInput = document.getElementById("subjectInput");
+const messageEditor = document.getElementById("messageEditor");
 
+const scheduleDate = document.getElementById("scheduleDate");
+const scheduleTime = document.getElementById("scheduleTime");
+const timezone = document.getElementById("timezone");
+const scheduleConfirmation = document.getElementById("scheduleConfirmation");
 
-const ccSection =
-    document.getElementById("ccSection");
+const previewButton = document.getElementById("previewButton");
+const previewModal = document.getElementById("previewModal");
+const closePreview = document.getElementById("closePreview");
+const editButton = document.getElementById("editButton");
+const confirmScheduleButton = document.getElementById("confirmScheduleButton");
+const previewBody = document.getElementById("previewBody");
+const scheduleButton = document.getElementById("scheduleButton");
 
-const bccSection =
-    document.getElementById("bccSection");
+const attachmentInput = document.getElementById("attachmentInput");
+const attachmentList = document.getElementById("attachmentList");
 
+const scheduledNav = document.getElementById("scheduledNav");
+const scheduledView = document.getElementById("scheduledView");
+const composeView = document.getElementById("composeView");
 
-const subjectInput =
-    document.getElementById("subjectInput");
+const backButton = document.getElementById("backButton");
+const scheduledList = document.getElementById("scheduledList");
+const emptyState = document.getElementById("emptyState");
+const scheduledCount = document.getElementById("scheduledCount");
+const createEmailButton = document.getElementById("createEmailButton");
 
-const messageEditor =
-    document.getElementById("messageEditor");
+const totalSentCount = document.getElementById("totalSentCount");
+const deliveredCount = document.getElementById("deliveredCount");
+const undeliveredCount = document.getElementById("undeliveredCount");
 
+const emailSearch = document.getElementById("emailSearch");
+const filterButton = document.getElementById("filterButton");
+const filterLabel = document.getElementById("filterLabel");
 
-const scheduleDate =
-    document.getElementById("scheduleDate");
+const sortDateButton = document.getElementById("sortDateButton");
+const sortArrow = document.getElementById("sortArrow");
 
-const scheduleTime =
-    document.getElementById("scheduleTime");
+const tableInfo = document.getElementById("tableInfo");
 
-const timezone =
-    document.getElementById("timezone");
-
-
-const scheduleConfirmation =
-    document.getElementById("scheduleConfirmation");
-
-
-const previewButton =
-    document.getElementById("previewButton");
-
-const previewModal =
-    document.getElementById("previewModal");
-
-const closePreview =
-    document.getElementById("closePreview");
-
-const editButton =
-    document.getElementById("editButton");
-
-const confirmScheduleButton =
-    document.getElementById("confirmScheduleButton");
-
-
-const scheduleButton =
-    document.getElementById("scheduleButton");
-
-
-const previewBody =
-    document.getElementById("previewBody");
-
-
-const attachmentInput =
-    document.getElementById("attachmentInput");
-
-const attachmentList =
-    document.getElementById("attachmentList");
-
-
-const scheduledNav =
-    document.getElementById("scheduledNav");
-
-const scheduledView =
-    document.getElementById("scheduledView");
-
-const composeView =
-    document.getElementById("composeView");
-
-const backButton =
-    document.getElementById("backButton");
-
-const scheduledList =
-    document.getElementById("scheduledList");
-
-const emptyState =
-    document.getElementById("emptyState");
-
-const scheduledCount =
-    document.getElementById("scheduledCount");
-
-const createEmailButton =
-    document.getElementById("createEmailButton");
+const prevPage = document.getElementById("prevPage");
+const nextPage = document.getElementById("nextPage");
+const pageNumbers = document.getElementById("pageNumbers");
 
 
 /* =========================================
@@ -116,146 +76,430 @@ const createEmailButton =
 ========================================= */
 
 let recipients = [];
+let ccRecipients = [];
+let bccRecipients = [];
 
+let selectedFiles = [];
 let scheduledEmails = [];
 
+let currentPage = 1;
+const rowsPerPage = 5;
 
-/* =========================================
-   DEFAULT DATE
-========================================= */
-
-const today =
-    new Date();
-
-
-const formattedToday =
-    today
-        .toISOString()
-        .split("T")[0];
-
-
-scheduleDate.min =
-    formattedToday;
+let currentFilter = "all";
+let dateSortDirection = "desc";
 
 
 /* =========================================
-   DETECT TIMEZONE
+   GENERAL HELPERS
 ========================================= */
 
-const detectedTimezone =
-    Intl
-        .DateTimeFormat()
-        .resolvedOptions()
-        .timeZone;
+function escapeHTML(value) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+        return "";
+    }
+
+    const div = document.createElement("div");
+
+    div.textContent = String(value);
+
+    return div.innerHTML;
+}
 
 
-const timezoneOptions =
-    Array.from(
-        timezone.options
+function stripHTML(value) {
+
+    const div = document.createElement("div");
+
+    div.innerHTML = value || "";
+
+    return (
+        div.textContent ||
+        div.innerText ||
+        ""
+    ).trim();
+}
+
+
+function parseEmailList(value) {
+
+    if (!value) {
+        return [];
+    }
+
+    if (Array.isArray(value)) {
+        return value.filter(Boolean);
+    }
+
+    if (typeof value === "string") {
+
+        try {
+
+            const parsed = JSON.parse(value);
+
+            if (Array.isArray(parsed)) {
+                return parsed.filter(Boolean);
+            }
+
+        } catch (error) {
+
+            /* Normal string */
+
+        }
+
+        return value
+            .split(",")
+            .map(email => email.trim())
+            .filter(Boolean);
+    }
+
+    return [];
+}
+
+
+function isValidEmail(email) {
+
+    const pattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    return pattern.test(email);
+}
+
+
+function getEmailDate(email) {
+
+    const raw =
+        email.scheduled_time ||
+        email.scheduledTime ||
+        email.sent_at ||
+        email.sentAt ||
+        (
+            email.date &&
+            email.time
+                ? `${email.date}T${email.time}`
+                : null
+        );
+
+    if (!raw) {
+        return null;
+    }
+
+    const date = new Date(raw);
+
+    return Number.isNaN(date.getTime())
+        ? null
+        : date;
+}
+
+
+function formatSchedule(email) {
+
+    const date = getEmailDate(email);
+
+    if (!date) {
+        return "Date and time not available";
+    }
+
+    return date.toLocaleString(
+        "en-IN",
+        {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
     );
+}
 
 
-const timezoneExists =
-    timezoneOptions.some(
-        option =>
-            option.value ===
-            detectedTimezone
+function formatDateParts(email) {
+
+    const date = getEmailDate(email);
+
+    if (!date) {
+
+        return {
+            date: "Date not available",
+            time: "Time not available"
+        };
+
+    }
+
+    return {
+
+        date:
+            date.toLocaleDateString(
+                "en-IN",
+                {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric"
+                }
+            ),
+
+        time:
+            date.toLocaleTimeString(
+                "en-IN",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            )
+
+    };
+}
+
+
+function getStatusText(status) {
+
+    const value =
+        String(
+            status ||
+            "scheduled"
+        ).toLowerCase();
+
+
+    const statusMap = {
+
+        scheduled: "Scheduled",
+
+        sending: "Sending",
+
+        sent: "Delivered",
+
+        delivered: "Delivered",
+
+        opened: "Opened",
+
+        failed: "Undelivered",
+
+        undelivered: "Undelivered",
+
+        cancelled: "Cancelled"
+
+    };
+
+
+    return (
+        statusMap[value] ||
+        "Scheduled"
     );
+}
 
 
-if (
-    timezoneExists
-) {
+function getStatusClass(status) {
 
-    timezone.value =
-        detectedTimezone;
+    const value =
+        String(
+            status ||
+            "scheduled"
+        ).toLowerCase();
+
+
+    if (
+        value === "sent" ||
+        value === "delivered"
+    ) {
+        return "status-delivered";
+    }
+
+
+    if (
+        value === "opened"
+    ) {
+        return "status-opened";
+    }
+
+
+    if (
+        value === "failed" ||
+        value === "undelivered"
+    ) {
+        return "status-undelivered";
+    }
+
+
+    if (
+        value === "sending"
+    ) {
+        return "status-sending";
+    }
+
+
+    if (
+        value === "cancelled"
+    ) {
+        return "status-cancelled";
+    }
+
+
+    return "status-scheduled";
+}
+
+
+function getRecipientName(emailAddress) {
+
+    if (!emailAddress) {
+        return "Recipient";
+    }
+
+
+    const namePart =
+        emailAddress.split("@")[0];
+
+
+    return (
+        namePart
+            .split(/[._-]+/)
+            .filter(Boolean)
+            .map(
+                word =>
+                    word.charAt(0).toUpperCase() +
+                    word.slice(1)
+            )
+            .join(" ")
+        ||
+        "Recipient"
+    );
+}
+
+
+function getInitial(value) {
+
+    return (
+        String(
+            value ||
+            "E"
+        )
+            .trim()
+            .charAt(0)
+            .toUpperCase()
+        ||
+        "E"
+    );
+}
+
+
+/* =========================================
+   DATE AND TIME SETUP
+========================================= */
+
+if (scheduleDate) {
+
+    scheduleDate.min =
+        new Date()
+            .toISOString()
+            .split("T")[0];
+
+}
+
+
+if (timezone) {
+
+    const detectedTimezone =
+        Intl.DateTimeFormat()
+            .resolvedOptions()
+            .timeZone;
+
+
+    const timezoneExists =
+        Array
+            .from(timezone.options)
+            .some(
+                option =>
+                    option.value ===
+                    detectedTimezone
+            );
+
+
+    if (timezoneExists) {
+
+        timezone.value =
+            detectedTimezone;
+
+    }
 
 }
 
 
 /* =========================================
-   RECIPIENT INPUT
+   TO RECIPIENTS
 ========================================= */
 
-recipientBox.addEventListener(
-    "click",
-    () => {
+if (
+    recipientBox &&
+    recipientInput
+) {
 
-        recipientInput.focus();
+    recipientBox.addEventListener(
+        "click",
+        () => recipientInput.focus()
+    );
 
-    }
-);
-
-
-recipientInput.addEventListener(
-    "keydown",
-    function (event) {
-
-        if (
-            event.key === "Enter" ||
-            event.key === ","
-        ) {
-
-            event.preventDefault();
-
-            addRecipient(
-                recipientInput.value
-            );
-
-        }
-
-    }
-);
+}
 
 
-recipientInput.addEventListener(
-    "blur",
-    function () {
+if (recipientInput) {
 
-        if (
-            recipientInput.value.trim()
-        ) {
+    recipientInput.addEventListener(
+        "keydown",
+        event => {
 
-            addRecipient(
-                recipientInput.value
-            );
+            if (
+                event.key === "Enter" ||
+                event.key === ","
+            ) {
+
+                event.preventDefault();
+
+                addRecipient(
+                    recipientInput.value
+                );
+
+            }
 
         }
-
-    }
-);
+    );
 
 
-/* =========================================
-   ADD RECIPIENT
-========================================= */
+    recipientInput.addEventListener(
+        "blur",
+        () => {
+
+            if (
+                recipientInput.value.trim()
+            ) {
+
+                addRecipient(
+                    recipientInput.value
+                );
+
+            }
+
+        }
+    );
+
+}
+
 
 function addRecipient(email) {
 
     email =
         email
             .trim()
-            .replace(",", "");
+            .replace(/,/g, "");
 
 
-    if (
-        !email
-    ) {
-
+    if (!email) {
         return;
-
     }
 
 
-    const emailPattern =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-    if (
-        !emailPattern.test(
-            email
-        )
-    ) {
+    if (!isValidEmail(email)) {
 
         alert(
             "Please enter a valid email address."
@@ -267,51 +511,40 @@ function addRecipient(email) {
 
 
     if (
-        recipients.includes(
-            email
-        )
+        !recipients.includes(email)
     ) {
 
-        recipientInput.value =
-            "";
+        recipients.push(email);
 
-        return;
+        renderRecipients();
 
     }
 
 
-    recipients.push(
-        email
-    );
+    if (recipientInput) {
 
+        recipientInput.value = "";
 
-    renderRecipients();
-
-
-    recipientInput.value =
-        "";
+    }
 
 }
 
 
-/* =========================================
-   RENDER RECIPIENTS
-========================================= */
-
 function renderRecipients() {
 
-    recipientChips.innerHTML =
-        "";
+    if (!recipientChips) {
+        return;
+    }
+
+
+    recipientChips.innerHTML = "";
 
 
     recipients.forEach(
         email => {
 
             const chip =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             chip.className =
                 "recipient-chip";
@@ -320,12 +553,12 @@ function renderRecipients() {
             chip.innerHTML = `
 
                 <span>
-                    ${email}
+                    ${escapeHTML(email)}
                 </span>
 
                 <span
                     class="remove-chip"
-                    data-email="${email}"
+                    title="Remove"
                 >
                     ×
                 </span>
@@ -333,34 +566,25 @@ function renderRecipients() {
             `;
 
 
-            recipientChips.appendChild(
-                chip
-            );
-
-        }
-    );
+            const removeButton =
+                chip.querySelector(
+                    ".remove-chip"
+                );
 
 
-    document
-        .querySelectorAll(
-            ".remove-chip"
-        )
-        .forEach(
-            button => {
+            if (removeButton) {
 
-                button.addEventListener(
+                removeButton.addEventListener(
                     "click",
-                    function () {
+                    event => {
 
-                        const email =
-                            this.dataset.email;
+                        event.stopPropagation();
 
 
                         recipients =
                             recipients.filter(
                                 item =>
-                                    item !==
-                                    email
+                                    item !== email
                             );
 
 
@@ -370,37 +594,377 @@ function renderRecipients() {
                 );
 
             }
-        );
+
+
+            recipientChips.appendChild(chip);
+
+        }
+    );
 
 }
 
 
 /* =========================================
-   CC / BCC
+   CC AND BCC TOGGLE
 ========================================= */
 
-toggleCc.addEventListener(
-    "click",
-    () => {
+if (
+    toggleCc &&
+    ccSection
+) {
 
-        ccSection.classList.toggle(
-            "hidden"
+    toggleCc.addEventListener(
+        "click",
+        () => {
+
+            ccSection.classList.toggle(
+                "hidden"
+            );
+
+        }
+    );
+
+}
+
+
+if (
+    toggleBcc &&
+    bccSection
+) {
+
+    toggleBcc.addEventListener(
+        "click",
+        () => {
+
+            bccSection.classList.toggle(
+                "hidden"
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   CC RECIPIENTS
+========================================= */
+
+function addCcEmail() {
+
+    if (!ccInput) {
+        return;
+    }
+
+
+    const email =
+        ccInput.value
+            .trim()
+            .replace(/,/g, "");
+
+
+    if (!email) {
+        return;
+    }
+
+
+    if (!isValidEmail(email)) {
+
+        alert(
+            "Please enter a valid email address."
         );
 
+        return;
+
     }
-);
 
 
-toggleBcc.addEventListener(
-    "click",
-    () => {
+    if (
+        !ccRecipients.includes(email)
+    ) {
 
-        bccSection.classList.toggle(
-            "hidden"
+        ccRecipients.push(email);
+
+        renderCcRecipients();
+
+    }
+
+
+    ccInput.value = "";
+
+}
+
+
+function renderCcRecipients() {
+
+    if (!ccChips) {
+        return;
+    }
+
+
+    ccChips.innerHTML = "";
+
+
+    ccRecipients.forEach(
+        email => {
+
+            const chip =
+                createEmailChip(
+                    email,
+                    "cc"
+                );
+
+
+            ccChips.appendChild(chip);
+
+        }
+    );
+
+}
+
+
+if (ccInput) {
+
+    ccInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter" ||
+                event.key === ","
+            ) {
+
+                event.preventDefault();
+
+                addCcEmail();
+
+            }
+
+        }
+    );
+
+
+    ccInput.addEventListener(
+        "blur",
+        () => {
+
+            if (
+                ccInput.value.trim()
+            ) {
+
+                addCcEmail();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   BCC RECIPIENTS
+========================================= */
+
+function addBccEmail() {
+
+    if (!bccInput) {
+        return;
+    }
+
+
+    const email =
+        bccInput.value
+            .trim()
+            .replace(/,/g, "");
+
+
+    if (!email) {
+        return;
+    }
+
+
+    if (!isValidEmail(email)) {
+
+        alert(
+            "Please enter a valid email address."
         );
 
+        return;
+
     }
-);
+
+
+    if (
+        !bccRecipients.includes(email)
+    ) {
+
+        bccRecipients.push(email);
+
+        renderBccRecipients();
+
+    }
+
+
+    bccInput.value = "";
+
+}
+
+
+function renderBccRecipients() {
+
+    if (!bccChips) {
+        return;
+    }
+
+
+    bccChips.innerHTML = "";
+
+
+    bccRecipients.forEach(
+        email => {
+
+            const chip =
+                createEmailChip(
+                    email,
+                    "bcc"
+                );
+
+
+            bccChips.appendChild(chip);
+
+        }
+    );
+
+}
+
+
+if (bccInput) {
+
+    bccInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter" ||
+                event.key === ","
+            ) {
+
+                event.preventDefault();
+
+                addBccEmail();
+
+            }
+
+        }
+    );
+
+
+    bccInput.addEventListener(
+        "blur",
+        () => {
+
+            if (
+                bccInput.value.trim()
+            ) {
+
+                addBccEmail();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   CREATE EMAIL CHIP
+========================================= */
+
+function createEmailChip(
+    email,
+    type
+) {
+
+    const chip =
+        document.createElement("div");
+
+
+    chip.className =
+        "email-chip";
+
+
+    const emailText =
+        document.createElement("span");
+
+
+    emailText.textContent =
+        email;
+
+
+    const removeButton =
+        document.createElement("button");
+
+
+    removeButton.type =
+        "button";
+
+
+    removeButton.className =
+        "remove-chip";
+
+
+    removeButton.textContent =
+        "×";
+
+
+    removeButton.addEventListener(
+        "click",
+        event => {
+
+            event.stopPropagation();
+
+
+            if (type === "cc") {
+
+                ccRecipients =
+                    ccRecipients.filter(
+                        item =>
+                            item !== email
+                    );
+
+
+                renderCcRecipients();
+
+            }
+
+
+            if (type === "bcc") {
+
+                bccRecipients =
+                    bccRecipients.filter(
+                        item =>
+                            item !== email
+                    );
+
+
+                renderBccRecipients();
+
+            }
+
+        }
+    );
+
+
+    chip.appendChild(emailText);
+
+    chip.appendChild(removeButton);
+
+
+    return chip;
+
+}
 
 
 /* =========================================
@@ -418,18 +982,18 @@ document
                 "click",
                 () => {
 
-                    const command =
-                        button.dataset.command;
-
-
                     document.execCommand(
-                        command,
+                        button.dataset.command,
                         false,
                         null
                     );
 
 
-                    messageEditor.focus();
+                    if (messageEditor) {
+
+                        messageEditor.focus();
+
+                    }
 
                 }
             );
@@ -438,15 +1002,15 @@ document
     );
 
 
-/* =========================================
-   INSERT LINK
-========================================= */
-
-document
-    .getElementById(
+const linkButton =
+    document.getElementById(
         "linkButton"
-    )
-    .addEventListener(
+    );
+
+
+if (linkButton) {
+
+    linkButton.addEventListener(
         "click",
         () => {
 
@@ -456,9 +1020,7 @@ document
                 );
 
 
-            if (
-                url
-            ) {
+            if (url) {
 
                 document.execCommand(
                     "createLink",
@@ -471,74 +1033,236 @@ document
         }
     );
 
+}
+
 
 /* =========================================
    ATTACHMENTS
 ========================================= */
 
-attachmentInput.addEventListener(
-    "change",
-    function () {
+if (attachmentInput) {
 
-        attachmentList.innerHTML =
-            "";
+    attachmentInput.addEventListener(
+        "change",
+        () => {
+
+            const newFiles =
+                Array.from(
+                    attachmentInput.files
+                );
 
 
-        Array
-            .from(
-                attachmentInput.files
-            )
-            .forEach(
+            newFiles.forEach(
                 file => {
 
-                    const item =
-                        document.createElement(
-                            "div"
+                    const exists =
+                        selectedFiles.some(
+                            item =>
+                                item.name === file.name
+                                &&
+                                item.size === file.size
                         );
 
 
-                    item.className =
-                        "attachment-item";
+                    if (!exists) {
 
+                        selectedFiles.push(file);
 
-                    item.textContent =
-                        `📎 ${file.name}`;
-
-
-                    attachmentList.appendChild(
-                        item
-                    );
+                    }
 
                 }
             );
 
+
+            updateAttachmentInput();
+
+            renderAttachments();
+
+        }
+    );
+
+}
+
+
+function updateAttachmentInput() {
+
+    if (!attachmentInput) {
+        return;
     }
-);
+
+
+    const transfer =
+        new DataTransfer();
+
+
+    selectedFiles.forEach(
+        file => {
+
+            transfer.items.add(file);
+
+        }
+    );
+
+
+    attachmentInput.files =
+        transfer.files;
+
+}
+
+
+function renderAttachments() {
+
+    if (!attachmentList) {
+        return;
+    }
+
+
+    attachmentList.innerHTML = "";
+
+
+    selectedFiles.forEach(
+        (file, index) => {
+
+            const item =
+                document.createElement("div");
+
+
+            item.className =
+                "attachment-item";
+
+
+            item.innerHTML = `
+
+                <div class="attachment-file-info">
+
+                    <span>
+                        📎
+                    </span>
+
+                    <span class="attachment-name">
+                        ${escapeHTML(file.name)}
+                    </span>
+
+                </div>
+
+
+                <div class="attachment-actions">
+
+                    <button
+                        type="button"
+                        class="attachment-preview"
+                    >
+                        👁 View
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="attachment-remove"
+                    >
+                        ✕ Remove
+                    </button>
+
+                </div>
+
+            `;
+
+
+            const previewAttachment =
+                item.querySelector(
+                    ".attachment-preview"
+                );
+
+
+            const removeAttachment =
+                item.querySelector(
+                    ".attachment-remove"
+                );
+
+
+            if (previewAttachment) {
+
+                previewAttachment.addEventListener(
+                    "click",
+                    () => {
+
+                        const fileURL =
+                            URL.createObjectURL(file);
+
+
+                        window.open(
+                            fileURL,
+                            "_blank"
+                        );
+
+                    }
+                );
+
+            }
+
+
+            if (removeAttachment) {
+
+                removeAttachment.addEventListener(
+                    "click",
+                    () => {
+
+                        selectedFiles.splice(
+                            index,
+                            1
+                        );
+
+
+                        updateAttachmentInput();
+
+                        renderAttachments();
+
+                    }
+                );
+
+            }
+
+
+            attachmentList.appendChild(item);
+
+        }
+    );
+
+}
 
 
 /* =========================================
    SCHEDULE CONFIRMATION
 ========================================= */
 
-scheduleDate.addEventListener(
-    "change",
-    updateScheduleConfirmation
-);
+[
+    scheduleDate,
+    scheduleTime,
+    timezone
+]
+    .filter(Boolean)
+    .forEach(
+        element => {
 
+            element.addEventListener(
+                "change",
+                updateScheduleConfirmation
+            );
 
-scheduleTime.addEventListener(
-    "change",
-    updateScheduleConfirmation
-);
-
-
-timezone.addEventListener(
-    "change",
-    updateScheduleConfirmation
-);
+        }
+    );
 
 
 function updateScheduleConfirmation() {
+
+    if (
+        !scheduleDate ||
+        !scheduleTime ||
+        !scheduleConfirmation
+    ) {
+        return;
+    }
+
 
     const date =
         scheduleDate.value;
@@ -581,41 +1305,25 @@ function updateScheduleConfirmation() {
 
 
     const formattedDate =
-        selectedDateTime
-            .toLocaleDateString(
-                "en-IN",
-                {
-
-                    weekday:
-                        "long",
-
-                    day:
-                        "numeric",
-
-                    month:
-                        "short",
-
-                    year:
-                        "numeric"
-
-                }
-            );
+        selectedDateTime.toLocaleDateString(
+            "en-IN",
+            {
+                weekday: "long",
+                day: "numeric",
+                month: "short",
+                year: "numeric"
+            }
+        );
 
 
     const formattedTime =
-        selectedDateTime
-            .toLocaleTimeString(
-                "en-IN",
-                {
-
-                    hour:
-                        "2-digit",
-
-                    minute:
-                        "2-digit"
-
-                }
-            );
+        selectedDateTime.toLocaleTimeString(
+            "en-IN",
+            {
+                hour: "2-digit",
+                minute: "2-digit"
+            }
+        );
 
 
     scheduleConfirmation.textContent =
@@ -625,7 +1333,7 @@ function updateScheduleConfirmation() {
 
 
 /* =========================================
-   GET FORM DATA
+   GET EMAIL DATA
 ========================================= */
 
 function getEmailData() {
@@ -633,43 +1341,38 @@ function getEmailData() {
     return {
 
         recipients:
-            recipients,
-
+            [...recipients],
 
         cc:
-            document
-                .getElementById(
-                    "ccInput"
-                )
-                .value,
-
+            [...ccRecipients],
 
         bcc:
-            document
-                .getElementById(
-                    "bccInput"
-                )
-                .value,
-
+            [...bccRecipients],
 
         subject:
-            subjectInput.value,
-
+            subjectInput
+                ? subjectInput.value
+                : "",
 
         message:
-            messageEditor.innerHTML,
-
+            messageEditor
+                ? messageEditor.innerHTML
+                : "",
 
         date:
-            scheduleDate.value,
-
+            scheduleDate
+                ? scheduleDate.value
+                : "",
 
         time:
-            scheduleTime.value,
-
+            scheduleTime
+                ? scheduleTime.value
+                : "",
 
         timezone:
-            timezone.value
+            timezone
+                ? timezone.value
+                : ""
 
     };
 
@@ -677,13 +1380,13 @@ function getEmailData() {
 
 
 /* =========================================
-   VALIDATE FORM
+   VALIDATE EMAIL
 ========================================= */
 
 function validateEmail() {
 
     if (
-        recipients.length === 0
+        !recipients.length
     ) {
 
         alert(
@@ -696,6 +1399,7 @@ function validateEmail() {
 
 
     if (
+        !subjectInput ||
         !subjectInput.value.trim()
     ) {
 
@@ -709,6 +1413,7 @@ function validateEmail() {
 
 
     if (
+        !messageEditor ||
         !messageEditor.innerText.trim()
     ) {
 
@@ -722,6 +1427,8 @@ function validateEmail() {
 
 
     if (
+        !scheduleDate ||
+        !scheduleTime ||
         !scheduleDate.value ||
         !scheduleTime.value
     ) {
@@ -761,28 +1468,33 @@ function validateEmail() {
 
 
 /* =========================================
-   PREVIEW EMAIL
+   COMPOSE EMAIL PREVIEW
 ========================================= */
 
-previewButton.addEventListener(
-    "click",
-    openPreview
-);
+if (previewButton) {
+
+    previewButton.addEventListener(
+        "click",
+        openPreview
+    );
+
+}
 
 
 function openPreview() {
 
-    if (
-        !validateEmail()
-    ) {
-
+    if (!validateEmail()) {
         return;
-
     }
 
 
     const data =
         getEmailData();
+
+
+    if (!previewBody) {
+        return;
+    }
 
 
     previewBody.innerHTML = `
@@ -793,40 +1505,50 @@ function openPreview() {
                 To:
             </span>
 
-            ${data.recipients.join(", ")}
+            ${data.recipients
+                .map(escapeHTML)
+                .join(", ")}
 
         </div>
 
 
         ${
-            data.cc
+            data.cc.length
                 ? `
+
                 <div class="preview-row">
 
                     <span class="preview-label">
                         CC:
                     </span>
 
-                    ${data.cc}
+                    ${data.cc
+                        .map(escapeHTML)
+                        .join(", ")}
 
                 </div>
+
                 `
                 : ""
         }
 
 
         ${
-            data.bcc
+            data.bcc.length
                 ? `
+
                 <div class="preview-row">
 
                     <span class="preview-label">
                         BCC:
                     </span>
 
-                    ${data.bcc}
+                    ${data.bcc
+                        .map(escapeHTML)
+                        .join(", ")}
 
                 </div>
+
                 `
                 : ""
         }
@@ -838,7 +1560,7 @@ function openPreview() {
                 Subject:
             </span>
 
-            ${data.subject}
+            ${escapeHTML(data.subject)}
 
         </div>
 
@@ -852,226 +1574,303 @@ function openPreview() {
 
         <div class="preview-schedule">
 
-            🕐 <strong>
+            🕐
+            <strong>
                 Scheduled for
             </strong>
 
             <br>
 
-            ${formatSchedule(data)}
+            ${formatSchedule({
+                scheduledTime:
+                    `${data.date}T${data.time}`
+            })}
 
         </div>
 
     `;
 
 
-    previewModal.classList.remove(
-        "hidden"
-    );
+    if (previewModal) {
+
+        previewModal.classList.remove(
+            "hidden"
+        );
+
+    }
 
 }
+
+
+/* =========================================
+   SCHEDULED EMAIL PREVIEW
+========================================= */
+
+window.previewScheduledEmail =
+    function (id) {
+
+        const email =
+            scheduledEmails.find(
+                item =>
+                    Number(item.id) ===
+                    Number(id)
+            );
+
+
+        if (!email) {
+
+            alert(
+                "Email details not found."
+            );
+
+            return;
+
+        }
+
+
+        const emailRecipients =
+            parseEmailList(
+                email.recipients
+            );
+
+
+        const emailCc =
+            parseEmailList(
+                email.cc
+            );
+
+
+        const emailBcc =
+            parseEmailList(
+                email.bcc
+            );
+
+
+        if (!previewBody) {
+            return;
+        }
+
+
+        previewBody.innerHTML = `
+
+            <div class="preview-row">
+
+                <span class="preview-label">
+                    To:
+                </span>
+
+                ${emailRecipients
+                    .map(escapeHTML)
+                    .join(", ")}
+
+            </div>
+
+
+            ${
+                emailCc.length
+                    ? `
+
+                    <div class="preview-row">
+
+                        <span class="preview-label">
+                            CC:
+                        </span>
+
+                        ${emailCc
+                            .map(escapeHTML)
+                            .join(", ")}
+
+                    </div>
+
+                    `
+                    : ""
+            }
+
+
+            ${
+                emailBcc.length
+                    ? `
+
+                    <div class="preview-row">
+
+                        <span class="preview-label">
+                            BCC:
+                        </span>
+
+                        ${emailBcc
+                            .map(escapeHTML)
+                            .join(", ")}
+
+                    </div>
+
+                    `
+                    : ""
+            }
+
+
+            <div class="preview-row">
+
+                <span class="preview-label">
+                    Subject:
+                </span>
+
+                ${escapeHTML(
+                    email.subject ||
+                    "No Subject"
+                )}
+
+            </div>
+
+
+            <div class="preview-message">
+
+                ${
+                    email.message ||
+                    "No message content."
+                }
+
+            </div>
+
+
+            <div class="preview-schedule">
+
+                🕐
+                <strong>
+                    Scheduled for
+                </strong>
+
+                <br>
+
+                ${formatSchedule(email)}
+
+            </div>
+
+        `;
+
+
+        if (previewModal) {
+
+            previewModal.classList.remove(
+                "hidden"
+            );
+
+        }
+
+    };
+
+
+    
 
 
 /* =========================================
    CLOSE MODAL
 ========================================= */
 
-closePreview.addEventListener(
-    "click",
-    closeModal
-);
+function closeModal() {
+
+    if (previewModal) {
+
+        previewModal.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
 
 
-editButton.addEventListener(
-    "click",
-    closeModal
-);
+if (closePreview) {
 
-
-document
-    .querySelector(
-        ".modal-overlay"
-    )
-    .addEventListener(
+    closePreview.addEventListener(
         "click",
         closeModal
     );
 
+}
 
-function closeModal() {
 
-    previewModal.classList.add(
-        "hidden"
+if (editButton) {
+
+    editButton.addEventListener(
+        "click",
+        closeModal
+    );
+
+}
+
+
+const modalOverlay =
+    document.querySelector(
+        ".modal-overlay"
+    );
+
+
+if (modalOverlay) {
+
+    modalOverlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modalOverlay
+            ) {
+
+                closeModal();
+
+            }
+
+        }
     );
 
 }
 
 
 /* =========================================
-   FORMAT SCHEDULE
+   SEND / SCHEDULE EMAIL
 ========================================= */
 
-function formatSchedule(data) {
+if (scheduleButton) {
 
-    let dateTime;
-
-
-    if (
-        data.scheduled_time
-    ) {
-
-        dateTime =
-            new Date(
-                data.scheduled_time
-            );
-
-    }
-
-    else {
-
-        dateTime =
-            new Date(
-                `${data.date}T${data.time}`
-            );
-
-    }
-
-
-    const formattedDate =
-        dateTime.toLocaleDateString(
-            "en-IN",
-            {
-
-                day:
-                    "numeric",
-
-                month:
-                    "long",
-
-                year:
-                    "numeric"
-
-            }
-        );
-
-
-    const formattedTime =
-        dateTime.toLocaleTimeString(
-            "en-IN",
-            {
-
-                hour:
-                    "2-digit",
-
-                minute:
-                    "2-digit"
-
-            }
-        );
-
-
-    return `
-
-        ${formattedDate}
-        ·
-        ${formattedTime}
-
-    `;
+    scheduleButton.addEventListener(
+        "click",
+        scheduleEmail
+    );
 
 }
 
 
-/* =========================================
-   SCHEDULE EMAIL
-   SEND TO BACKEND
-========================================= */
+if (confirmScheduleButton) {
 
-scheduleButton.addEventListener(
-    "click",
-    scheduleEmail
-);
+    confirmScheduleButton.addEventListener(
+        "click",
+        scheduleEmail
+    );
 
-
-confirmScheduleButton.addEventListener(
-    "click",
-    scheduleEmail
-);
+}
 
 
 async function scheduleEmail() {
 
-    if (
-        !validateEmail()
-    ) {
-
+    if (!validateEmail()) {
         return;
-
     }
 
 
     try {
 
-        /* =================================
-           PREVENT DOUBLE CLICK
-        ================================= */
+        if (scheduleButton) {
 
-        scheduleButton.disabled =
-            true;
+            scheduleButton.disabled = true;
 
-
-        confirmScheduleButton.disabled =
-            true;
+        }
 
 
-        /* =================================
-           GET CC / BCC
-        ================================= */
+        if (confirmScheduleButton) {
 
-        const ccInput =
-            document.getElementById(
-                "ccInput"
-            );
+            confirmScheduleButton.disabled = true;
 
+        }
 
-        const bccInput =
-            document.getElementById(
-                "bccInput"
-            );
-
-
-        const cc =
-            ccInput.value
-                .split(",")
-
-                .map(
-                    email =>
-                        email.trim()
-                )
-
-                .filter(
-                    email =>
-                        email !== ""
-                );
-
-
-        const bcc =
-            bccInput.value
-                .split(",")
-
-                .map(
-                    email =>
-                        email.trim()
-                )
-
-                .filter(
-                    email =>
-                        email !== ""
-                );
-
-
-        /* =================================
-           COMBINE DATE + TIME
-        ================================= */
 
         const scheduledDateTime =
             new Date(
@@ -1079,153 +1878,102 @@ async function scheduleEmail() {
             );
 
 
-        /* =================================
-           CREATE FORM DATA
-        ================================= */
-
         const formData =
             new FormData();
 
 
         formData.append(
-
             "recipients",
-
-            JSON.stringify(
-                recipients
-            )
-
+            JSON.stringify(recipients)
         );
 
 
         formData.append(
-
             "cc",
-
-            JSON.stringify(
-                cc
-            )
-
+            JSON.stringify(ccRecipients)
         );
 
 
         formData.append(
-
             "bcc",
-
-            JSON.stringify(
-                bcc
-            )
-
+            JSON.stringify(bccRecipients)
         );
 
 
         formData.append(
-
             "subject",
-
             subjectInput.value.trim()
-
         );
 
 
         formData.append(
-
             "message",
-
             messageEditor.innerHTML
-
         );
 
 
         formData.append(
-
             "scheduledTime",
-
             scheduledDateTime.toISOString()
-
         );
 
 
-        /* =================================
-           ADD ATTACHMENTS
-        ================================= */
-
-        Array
-            .from(
-                attachmentInput.files
-            )
-            .forEach(
-                file => {
-
-                    formData.append(
-                        "attachments",
-                        file
-                    );
-
-                }
-            );
-
-
-        console.log(
-            "Sending email data to backend..."
+        formData.append(
+            "timezone",
+            timezone
+                ? timezone.value
+                : ""
         );
 
 
-        /* =================================
-           SEND TO BACKEND
-        ================================= */
+        selectedFiles.forEach(
+            file => {
+
+                formData.append(
+                    "attachments",
+                    file
+                );
+
+            }
+        );
+
 
         const response =
             await fetch(
-
                 `${API_URL}/emails`,
-
                 {
-
-                    method:
-                        "POST",
-
-                    body:
-                        formData
-
+                    method: "POST",
+                    body: formData
                 }
-
             );
 
 
-        const result =
-            await response.json();
+        let result = {};
 
 
-        console.log(
-            "Backend response:",
-            result
-        );
+        try {
 
+            result =
+                await response.json();
 
-        /* =================================
-           HANDLE ERROR
-        ================================= */
+        }
 
-        if (
-            !response.ok
-        ) {
+        catch (error) {
 
-            throw new Error(
-
-                result.message ||
-
-                "Unable to schedule email."
-
-            );
+            result = {};
 
         }
 
 
-        /* =================================
-           SUCCESS
-        ================================= */
+        if (!response.ok) {
+
+            throw new Error(
+                result.message ||
+                "Unable to schedule email."
+            );
+
+        }
+
 
         closeModal();
 
@@ -1241,16 +1989,12 @@ async function scheduleEmail() {
         await loadScheduledEmails();
 
 
-        updateScheduledCount();
-
-
         showScheduledView();
 
     }
 
-    catch (
-        error
-    ) {
+
+    catch (error) {
 
         console.error(
             "Scheduling error:",
@@ -1259,78 +2003,27 @@ async function scheduleEmail() {
 
 
         alert(
-
             error.message ||
-
             "Something went wrong while scheduling the email."
-
         );
 
     }
 
+
     finally {
 
-        scheduleButton.disabled =
-            false;
+        if (scheduleButton) {
 
-
-        confirmScheduleButton.disabled =
-            false;
-
-    }
-
-}
-
-
-/* =========================================
-   LOAD EMAILS FROM BACKEND
-========================================= */
-
-async function loadScheduledEmails() {
-
-    try {
-
-        const response =
-            await fetch(
-                `${API_URL}/emails`
-            );
-
-
-        const result =
-            await response.json();
-
-
-        if (
-            !response.ok
-        ) {
-
-            throw new Error(
-                result.message ||
-                "Unable to load emails."
-            );
+            scheduleButton.disabled = false;
 
         }
 
 
-        scheduledEmails =
-            result.emails;
+        if (confirmScheduleButton) {
 
+            confirmScheduleButton.disabled = false;
 
-        renderScheduledEmails();
-
-
-        updateScheduledCount();
-
-    }
-
-    catch (
-        error
-    ) {
-
-        console.error(
-            "Loading emails error:",
-            error
-        );
+        }
 
     }
 
@@ -1343,411 +2036,255 @@ async function loadScheduledEmails() {
 
 function resetForm() {
 
-    recipients =
-        [];
+    recipients = [];
+
+    ccRecipients = [];
+
+    bccRecipients = [];
+
+    selectedFiles = [];
 
 
     renderRecipients();
 
+    renderCcRecipients();
 
-    subjectInput.value =
-        "";
-
-
-    document
-        .getElementById(
-            "ccInput"
-        )
-        .value =
-        "";
+    renderBccRecipients();
 
 
-    document
-        .getElementById(
-            "bccInput"
-        )
-        .value =
-        "";
+    if (recipientInput) {
+
+        recipientInput.value = "";
+
+    }
 
 
-    messageEditor.innerHTML =
-        "";
+    if (ccInput) {
+
+        ccInput.value = "";
+
+    }
 
 
-    scheduleDate.value =
-        "";
+    if (bccInput) {
+
+        bccInput.value = "";
+
+    }
 
 
-    scheduleTime.value =
-        "";
+    if (subjectInput) {
+
+        subjectInput.value = "";
+
+    }
 
 
-    attachmentInput.value =
-        "";
+    if (messageEditor) {
+
+        messageEditor.innerHTML = "";
+
+    }
 
 
-    attachmentList.innerHTML =
-        "";
+    if (scheduleDate) {
+
+        scheduleDate.value = "";
+
+    }
 
 
-    scheduleConfirmation.textContent =
-        "🕐 Select a date and time";
+    if (scheduleTime) {
+
+        scheduleTime.value = "";
+
+    }
+
+
+    if (attachmentInput) {
+
+        attachmentInput.value = "";
+
+    }
+
+
+    updateAttachmentInput();
+
+    renderAttachments();
+
+
+    if (scheduleConfirmation) {
+
+        scheduleConfirmation.textContent =
+            "🕐 Select a date and time";
+
+    }
 
 }
 
 
 /* =========================================
-   SCHEDULED VIEW
+   VIEW SWITCHING
 ========================================= */
 
-scheduledNav.addEventListener(
-    "click",
-    async () => {
+if (scheduledNav) {
 
-        await showScheduledView();
+    scheduledNav.addEventListener(
+        "click",
+        async () => {
+
+            showScheduledView();
+
+            await loadScheduledEmails();
+
+        }
+    );
+
+}
+
+
+if (backButton) {
+
+    backButton.addEventListener(
+        "click",
+        showComposeView
+    );
+
+}
+
+
+if (createEmailButton) {
+
+    createEmailButton.addEventListener(
+        "click",
+        showComposeView
+    );
+
+}
+
+
+function showScheduledView() {
+
+    if (composeView) {
+
+        composeView.classList.add(
+            "hidden"
+        );
 
     }
-);
 
 
-backButton.addEventListener(
-    "click",
-    showComposeView
-);
+    if (scheduledView) {
 
+        scheduledView.classList.remove(
+            "hidden"
+        );
 
-createEmailButton.addEventListener(
-    "click",
-    showComposeView
-);
-
-
-async function showScheduledView() {
-
-    composeView.classList.add(
-        "hidden"
-    );
-
-
-    scheduledView.classList.remove(
-        "hidden"
-    );
-
-
-    await loadScheduledEmails();
+    }
 
 }
 
 
 function showComposeView() {
 
-    scheduledView.classList.add(
-        "hidden"
-    );
+    if (scheduledView) {
 
-
-    composeView.classList.remove(
-        "hidden"
-    );
-
-}
-
-
-/* =========================================
-   RENDER SCHEDULED EMAILS
-========================================= */
-
-function renderScheduledEmails() {
-
-    scheduledList.innerHTML =
-        "";
-
-
-    if (
-        scheduledEmails.length === 0
-    ) {
-
-        emptyState.classList.remove(
+        scheduledView.classList.add(
             "hidden"
         );
 
-        return;
-
     }
 
 
-    emptyState.classList.add(
-        "hidden"
-    );
+    if (composeView) {
 
+        composeView.classList.remove(
+            "hidden"
+        );
 
-    scheduledEmails.forEach(
-        email => {
-
-            const item =
-                document.createElement(
-                    "div"
-                );
-
-
-            item.className =
-                "scheduled-item";
-
-
-            /* =============================
-               RECIPIENTS
-            ============================= */
-
-            let emailRecipients =
-                [];
-
-
-            try {
-
-                emailRecipients =
-                    JSON.parse(
-                        email.recipients
-                    );
-
-            }
-
-            catch {
-
-                emailRecipients =
-                    [email.recipients];
-
-            }
-
-
-            /* =============================
-               STATUS
-            ============================= */
-
-            let statusText =
-                email.status;
-
-
-            if (
-                email.status ===
-                "scheduled"
-            ) {
-
-                statusText =
-                    "🟡 Scheduled";
-
-            }
-
-            else if (
-                email.status ===
-                "sending"
-            ) {
-
-                statusText =
-                    "🔵 Sending";
-
-            }
-
-            else if (
-                email.status ===
-                "sent"
-            ) {
-
-                statusText =
-                    "🟢 Sent";
-
-            }
-
-            else if (
-                email.status ===
-                "failed"
-            ) {
-
-                statusText =
-                    "🔴 Failed";
-
-            }
-
-            else if (
-                email.status ===
-                "cancelled"
-            ) {
-
-                statusText =
-                    "⚫ Cancelled";
-
-            }
-
-
-            /* =============================
-               ACTION BUTTON
-            ============================= */
-
-            let actionButton =
-                "";
-
-
-            if (
-                email.status ===
-                "scheduled"
-            ) {
-
-                actionButton = `
-
-                    <button
-                        class="small-btn delete-btn"
-                        onclick="deleteEmail(${email.id})"
-                    >
-
-                        Cancel
-
-                    </button>
-
-                `;
-
-            }
-
-
-            item.innerHTML = `
-
-                <div class="scheduled-info">
-
-                    <h3>
-
-                        ${escapeHTML(
-                            email.subject
-                        )}
-
-                    </h3>
-
-
-                    <p>
-
-                        ${emailRecipients
-                            .map(
-                                escapeHTML
-                            )
-                            .join(", ")
-                        }
-
-                    </p>
-
-
-                    <p>
-
-                        ${formatSchedule(
-                            email
-                        )}
-
-                    </p>
-
-
-                    <span class="status">
-
-                        ${statusText}
-
-                    </span>
-
-                </div>
-
-
-                <div class="item-actions">
-
-                    ${actionButton}
-
-                </div>
-
-            `;
-
-
-            scheduledList.appendChild(
-                item
-            );
-
-        }
-    );
+    }
 
 }
 
 
 /* =========================================
-   CANCEL EMAIL
+   LOAD EMAILS
 ========================================= */
 
-async function deleteEmail(id) {
-
-    const confirmDelete =
-        confirm(
-            "Are you sure you want to cancel this scheduled email?"
-        );
-
-
-    if (
-        !confirmDelete
-    ) {
-
-        return;
-
-    }
-
+async function loadScheduledEmails() {
 
     try {
 
         const response =
             await fetch(
-
-                `${API_URL}/emails/${id}/cancel`,
-
-                {
-
-                    method:
-                        "PATCH"
-
-                }
-
+                `${API_URL}/emails`
             );
 
 
-        const result =
-            await response.json();
+        let result = {};
 
 
-        if (
-            !response.ok
-        ) {
+        try {
+
+            result =
+                await response.json();
+
+        }
+
+        catch (error) {
+
+            result = {};
+
+        }
+
+
+        if (!response.ok) {
 
             throw new Error(
-
                 result.message ||
-
-                "Unable to cancel email."
-
+                "Unable to load emails."
             );
 
         }
 
 
-        alert(
-            "Email cancelled successfully."
-        );
+        scheduledEmails =
+            Array.isArray(
+                result.emails
+            )
+                ? result.emails
+                : [];
 
 
-        await loadScheduledEmails();
+        updateDashboard();
+
+        updateScheduledCount();
+
+
+        currentPage = 1;
+
+
+        renderScheduledEmails();
 
     }
 
-    catch (
-        error
-    ) {
+
+    catch (error) {
 
         console.error(
-            "Cancel error:",
+            "Loading emails error:",
             error
         );
 
 
-        alert(
-            error.message
-        );
+        scheduledEmails = [];
+
+
+        updateDashboard();
+
+        updateScheduledCount();
+
+        renderScheduledEmails();
 
     }
 
@@ -1755,17 +2292,33 @@ async function deleteEmail(id) {
 
 
 /* =========================================
-   UPDATE COUNT
+   UPDATE SCHEDULED COUNT
 ========================================= */
 
 function updateScheduledCount() {
 
+    if (!scheduledCount) {
+        return;
+    }
+
+
     const activeEmails =
         scheduledEmails.filter(
-            email =>
+            email => {
 
-                email.status ===
-                "scheduled"
+                const status =
+                    String(
+                        email.status ||
+                        "scheduled"
+                    ).toLowerCase();
+
+
+                return (
+                    status ===
+                    "scheduled"
+                );
+
+            }
         );
 
 
@@ -1776,32 +2329,1174 @@ function updateScheduledCount() {
 
 
 /* =========================================
-   ESCAPE HTML
+   FILTERED EMAILS
 ========================================= */
 
-function escapeHTML(text) {
+function getFilteredEmails() {
+
+    const search =
+        (
+            emailSearch
+                ? emailSearch.value
+                : ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    let emails =
+        [...scheduledEmails];
+
 
     if (
-        text === null ||
-        text === undefined
+        currentFilter !==
+        "all"
     ) {
 
-        return "";
+        emails =
+            emails.filter(
+                email => {
+
+                    const status =
+                        String(
+                            email.status ||
+                            "scheduled"
+                        ).toLowerCase();
+
+
+                    if (
+                        currentFilter ===
+                        "delivered"
+                    ) {
+
+                        return (
+                            status === "sent" ||
+                            status === "delivered"
+                        );
+
+                    }
+
+
+                    if (
+                        currentFilter ===
+                        "undelivered"
+                    ) {
+
+                        return (
+                            status === "scheduled" ||
+                            status === "undelivered"
+                        );
+
+                    }
+
+
+                    return (
+                        status ===
+                        currentFilter
+                    );
+
+                }
+            );
 
     }
 
 
-    const div =
-        document.createElement(
-            "div"
+    if (search) {
+
+        emails =
+            emails.filter(
+                email => {
+
+                    const recipientsList =
+                        parseEmailList(
+                            email.recipients
+                        ).join(" ");
+
+
+                    const text = [
+
+                        email.subject,
+
+                        email.message,
+
+                        email.status,
+
+                        recipientsList
+
+                    ]
+                        .join(" ")
+                        .toLowerCase();
+
+
+                    return text.includes(
+                        search
+                    );
+
+                }
+            );
+
+    }
+
+
+    emails.sort(
+        (a, b) => {
+
+            const dateA =
+                getEmailDate(a)
+                    ?.getTime()
+                ||
+                0;
+
+
+            const dateB =
+                getEmailDate(b)
+                    ?.getTime()
+                ||
+                0;
+
+
+            return (
+                dateSortDirection ===
+                "desc"
+            )
+                ? dateB - dateA
+                : dateA - dateB;
+
+        }
+    );
+
+
+    return emails;
+
+}
+
+
+function renderScheduledEmails() {
+
+    if (!scheduledList) {
+        return;
+    }
+
+
+    const filteredEmails =
+        getFilteredEmails();
+
+
+    const totalItems =
+        filteredEmails.length;
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalItems /
+                rowsPerPage
+            )
         );
 
 
-    div.textContent =
-        text;
+    if (
+        currentPage >
+        totalPages
+    ) {
+
+        currentPage =
+            totalPages;
+
+    }
 
 
-    return div.innerHTML;
+    const startIndex =
+        (currentPage - 1) *
+        rowsPerPage;
+
+
+    const pageEmails =
+        filteredEmails.slice(
+            startIndex,
+            startIndex +
+            rowsPerPage
+        );
+
+
+    scheduledList.innerHTML =
+        "";
+
+
+    if (!totalItems) {
+
+        if (emptyState) {
+
+            emptyState.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        updateTableInfo(
+            0,
+            0,
+            0
+        );
+
+
+        renderPagination(
+            0
+        );
+
+
+        return;
+
+    }
+
+
+    if (emptyState) {
+
+        emptyState.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    pageEmails.forEach(
+        email => {
+
+            const recipientsList =
+                parseEmailList(
+                    email.recipients
+                );
+
+
+            const firstRecipient =
+                recipientsList[0] ||
+                "No recipient";
+
+
+            const recipientName =
+                getRecipientName(
+                    firstRecipient
+                );
+
+
+            const statusText =
+                getStatusText(
+                    email.status
+                );
+
+
+            const statusClass =
+                getStatusClass(
+                    email.status
+                );
+
+
+            const dateParts =
+                formatDateParts(
+                    email
+                );
+
+
+            const previewText =
+                stripHTML(
+                    email.message
+                );
+
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.innerHTML = `
+
+                <td class="email-details-cell">
+
+                    <div class="email-detail">
+
+                        <div class="email-avatar">
+
+                            ${escapeHTML(
+                                getInitial(
+                                    email.subject ||
+                                    recipientName
+                                )
+                            )}
+
+                        </div>
+
+
+                        <div class="email-detail-text">
+
+                            <div class="email-subject">
+
+                                ${escapeHTML(
+                                    email.subject ||
+                                    "No Subject"
+                                )}
+
+                            </div>
+
+
+                            <div class="email-address">
+
+                                ${escapeHTML(
+                                    firstRecipient
+                                )}
+
+                            </div>
+
+
+                            ${
+                                previewText
+                                    ? `
+
+                                    <div class="email-preview-text">
+
+                                        ${escapeHTML(
+                                            previewText
+                                        )}
+
+                                    </div>
+
+                                    `
+                                    : ""
+                            }
+
+                        </div>
+
+                    </div>
+
+                </td>
+
+
+                <td class="date-cell">
+
+                    <div class="date-line">
+
+                        <span class="date-icon">
+                            ▣
+                        </span>
+
+                        <span>
+
+                            ${escapeHTML(
+                                dateParts.date
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="time-line">
+
+                        <span class="time-icon">
+                            ◷
+                        </span>
+
+                        <span>
+
+                            ${escapeHTML(
+                                dateParts.time
+                            )}
+
+                        </span>
+
+                    </div>
+
+                </td>
+
+
+                <td class="status-cell">
+
+                    <span
+                        class="status-badge ${statusClass}"
+                    >
+
+                        <span>
+
+                            ${
+                                statusClass ===
+                                "status-opened"
+                                    ? "◉"
+                                    : "◌"
+                            }
+
+                        </span>
+
+                        ${escapeHTML(
+                            statusText
+                        )}
+
+                    </span>
+
+                </td>
+
+
+                <td class="recipient-cell">
+
+                    <div class="recipient-name">
+
+                        ${escapeHTML(
+                            recipientName
+                        )}
+
+                    </div>
+
+
+                    <div class="recipient-email">
+
+                        ${escapeHTML(
+                            firstRecipient
+                        )}
+
+                    </div>
+
+                </td>
+
+
+                <td class="action-cell">
+
+                    <div class="email-action-buttons">
+
+                        <button
+                            type="button"
+                            class="preview-table-btn"
+                            data-preview-id="${escapeHTML(email.id)}"
+                        >
+
+                            ◉ Preview
+
+                        </button>
+
+
+                        ${
+                            statusClass ===
+                            "status-delivered"
+
+                                ? `
+
+                                <button
+                                    type="button"
+                                    class="delete-table-btn"
+                                    data-delete-id="${escapeHTML(email.id)}"
+                                >
+
+                                    🗑 Delete
+
+                                </button>
+
+                                `
+
+                                : ""
+                        }
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            /* ===============================
+               PREVIEW BUTTON
+            =============================== */
+
+            const previewButton =
+                row.querySelector(
+                    ".preview-table-btn"
+                );
+
+
+            if (previewButton) {
+
+                previewButton.addEventListener(
+                    "click",
+                    () => {
+
+                        window.previewScheduledEmail(
+                            email.id
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* ===============================
+               DELETE BUTTON
+            =============================== */
+
+            const deleteButton =
+                row.querySelector(
+                    ".delete-table-btn"
+                );
+
+
+            if (deleteButton) {
+
+                deleteButton.addEventListener(
+                    "click",
+                    async () => {
+
+                        const confirmed =
+                            confirm(
+                                "Are you sure you want to delete this email?"
+                            );
+
+
+                        if (!confirmed) {
+                            return;
+                        }
+
+
+                        try {
+
+                            deleteButton.disabled =
+                                true;
+
+
+                            deleteButton.textContent =
+                                "Deleting...";
+
+
+                            const response =
+                                await fetch(
+                                    `${API_URL}/emails/${email.id}`,
+                                    {
+                                        method:
+                                            "DELETE"
+                                    }
+                                );
+
+
+                            let result =
+                                {};
+
+
+                            try {
+
+                                result =
+                                    await response.json();
+
+                            }
+
+                            catch (error) {
+
+                                result =
+                                    {};
+
+                            }
+
+
+                            if (!response.ok) {
+
+                                throw new Error(
+                                    result.message ||
+                                    "Unable to delete email."
+                                );
+
+                            }
+
+
+                            /* =================================
+                               REMOVE EMAIL FROM LOCAL ARRAY
+                            ================================= */
+
+                            scheduledEmails =
+                                scheduledEmails.filter(
+                                    item =>
+
+                                        String(
+                                            item.id
+                                        ) !==
+
+                                        String(
+                                            email.id
+                                        )
+                                );
+
+
+                            /* =================================
+                               UPDATE COUNTS
+                            ================================= */
+
+                            updateDashboard();
+
+
+                            updateScheduledCount();
+
+
+                            /* =================================
+                               CHECK CURRENT PAGE
+                            ================================= */
+
+                            const remainingEmails =
+                                getFilteredEmails()
+                                    .length;
+
+
+                            const newTotalPages =
+                                Math.max(
+                                    1,
+                                    Math.ceil(
+                                        remainingEmails /
+                                        rowsPerPage
+                                    )
+                                );
+
+
+                            if (
+                                currentPage >
+                                newTotalPages
+                            ) {
+
+                                currentPage =
+                                    newTotalPages;
+
+                            }
+
+
+                            /* =================================
+                               RE-RENDER TABLE
+                            ================================= */
+
+                            renderScheduledEmails();
+
+
+                            alert(
+                                "Email deleted successfully!"
+                            );
+
+                        }
+
+                        catch (error) {
+
+                            console.error(
+                                "Delete error:",
+                                error
+                            );
+
+
+                            alert(
+                                error.message ||
+                                "Unable to delete email."
+                            );
+
+
+                            deleteButton.disabled =
+                                false;
+
+
+                            deleteButton.innerHTML =
+                                "🗑 Delete";
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            scheduledList.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    const startDisplay =
+        startIndex + 1;
+
+
+    const endDisplay =
+        Math.min(
+            startIndex +
+            rowsPerPage,
+            totalItems
+        );
+
+
+    updateTableInfo(
+        startDisplay,
+        endDisplay,
+        totalItems
+    );
+
+
+    renderPagination(
+        totalPages
+    );
+
+}
+
+/* =========================================
+   TABLE INFORMATION
+========================================= */
+
+function updateTableInfo(
+    start,
+    end,
+    total
+) {
+
+    if (!tableInfo) {
+        return;
+    }
+
+
+    tableInfo.textContent =
+        total === 0
+
+            ? "Showing 0 to 0 of 0 emails"
+
+            : `Showing ${start} to ${end} of ${total} emails`;
+
+}
+
+
+/* =========================================
+   PAGINATION
+========================================= */
+
+function renderPagination(totalPages) {
+
+    if (!pageNumbers) {
+        return;
+    }
+
+
+    pageNumbers.innerHTML = "";
+
+
+    if (
+        totalPages > 1
+    ) {
+
+        const visiblePages = [];
+
+
+        if (
+            totalPages <= 5
+        ) {
+
+            for (
+                let page = 1;
+                page <= totalPages;
+                page++
+            ) {
+
+                visiblePages.push(page);
+
+            }
+
+        }
+
+        else {
+
+            const start =
+                Math.max(
+                    1,
+                    currentPage - 2
+                );
+
+
+            const end =
+                Math.min(
+                    totalPages,
+                    start + 4
+                );
+
+
+            for (
+                let page = start;
+                page <= end;
+                page++
+            ) {
+
+                visiblePages.push(page);
+
+            }
+
+        }
+
+
+        visiblePages.forEach(
+            page => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.textContent =
+                    page;
+
+
+                if (
+                    page ===
+                    currentPage
+                ) {
+
+                    button.classList.add(
+                        "active-page"
+                    );
+
+                }
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        currentPage = page;
+
+                        renderScheduledEmails();
+
+                    }
+                );
+
+
+                pageNumbers.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+    if (prevPage) {
+
+        prevPage.disabled =
+            currentPage <= 1;
+
+    }
+
+
+    if (nextPage) {
+
+        nextPage.disabled =
+            currentPage >=
+            Math.max(
+                1,
+                totalPages
+            );
+
+    }
+
+}
+
+
+/* =========================================
+   UPDATE DASHBOARD
+========================================= */
+
+function updateDashboard() {
+
+    const total =
+        scheduledEmails.length;
+
+
+    /* =========================================
+       DELIVERED EMAILS
+    ========================================= */
+
+    const delivered =
+        scheduledEmails.filter(
+            email => {
+
+                const status =
+                    String(
+                        email.status || ""
+                    ).toLowerCase();
+
+
+                return (
+                    status === "sent" ||
+                    status === "delivered"
+                );
+
+            }
+        ).length;
+
+
+    /* =========================================
+       UNDELIVERED EMAILS
+
+       Scheduled emails are included here.
+    ========================================= */
+
+    const undelivered =
+        scheduledEmails.filter(
+            email => {
+
+                const status =
+                    String(
+                        email.status || "scheduled"
+                    ).toLowerCase();
+
+
+                return (
+
+                    status === "scheduled" ||
+
+                    status === "failed" ||
+
+                    status === "undelivered"
+
+                );
+
+            }
+        ).length;
+
+
+    /* =========================================
+       UPDATE TOTAL COUNT
+    ========================================= */
+
+    if (totalSentCount) {
+
+        totalSentCount.textContent =
+            total;
+
+    }
+
+
+    /* =========================================
+       UPDATE DELIVERED COUNT
+    ========================================= */
+
+    if (deliveredCount) {
+
+        deliveredCount.textContent =
+            delivered;
+
+    }
+
+
+    /* =========================================
+       UPDATE UNDELIVERED COUNT
+    ========================================= */
+
+    if (undeliveredCount) {
+
+        undeliveredCount.textContent =
+            undelivered;
+
+    }
+
+}
+
+/* =========================================
+   SEARCH
+========================================= */
+
+if (emailSearch) {
+
+    emailSearch.addEventListener(
+        "input",
+        () => {
+
+            currentPage = 1;
+
+            renderScheduledEmails();
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   FILTER
+========================================= */
+
+if (filterButton) {
+
+    filterButton.addEventListener(
+        "click",
+        () => {
+
+            const filters = [
+
+                "all",
+
+                "scheduled",
+
+                "delivered",
+
+                "undelivered"
+
+            ];
+
+
+            const labels = {
+
+                all:
+                    "Filter",
+
+                scheduled:
+                    "Scheduled",
+
+                delivered:
+                    "Delivered",
+
+                undelivered:
+                    "Undelivered"
+
+            };
+
+
+            const currentIndex =
+                filters.indexOf(
+                    currentFilter
+                );
+
+
+            currentFilter =
+                filters[
+                    (
+                        currentIndex + 1
+                    )
+                    %
+                    filters.length
+                ];
+
+
+            if (filterLabel) {
+
+                filterLabel.textContent =
+                    labels[currentFilter];
+
+            }
+
+
+            currentPage = 1;
+
+
+            renderScheduledEmails();
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   SORT DATE
+========================================= */
+
+if (sortDateButton) {
+
+    sortDateButton.addEventListener(
+        "click",
+        () => {
+
+            dateSortDirection =
+                dateSortDirection ===
+                "desc"
+
+                    ? "asc"
+
+                    : "desc";
+
+
+            if (sortArrow) {
+
+                sortArrow.textContent =
+                    dateSortDirection ===
+                    "desc"
+
+                        ? "↓"
+
+                        : "↑";
+
+            }
+
+
+            renderScheduledEmails();
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   PREVIOUS PAGE
+========================================= */
+
+if (prevPage) {
+
+    prevPage.addEventListener(
+        "click",
+        () => {
+
+            if (
+                currentPage > 1
+            ) {
+
+                currentPage--;
+
+                renderScheduledEmails();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   NEXT PAGE
+========================================= */
+
+if (nextPage) {
+
+    nextPage.addEventListener(
+        "click",
+        () => {
+
+            const totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        getFilteredEmails()
+                            .length
+                        /
+                        rowsPerPage
+                    )
+                );
+
+
+            if (
+                currentPage <
+                totalPages
+            ) {
+
+                currentPage++;
+
+                renderScheduledEmails();
+
+            }
+
+        }
+    );
 
 }
 

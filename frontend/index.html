@@ -1,16 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Mail Scheduler</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Ashvad Mail</title>
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
 
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -18,30 +30,46 @@
     >
 </head>
 
+
 <body>
+
 
     <!-- ================= HEADER ================= -->
 
     <header class="topbar">
 
         <div class="brand">
-            <div class="logo">✉</div>
 
-            <span>Mail Scheduler</span>
+            <div class="logo">
+                <img
+                    src="Ashvad Logo.png"
+                    alt="Ashvad Logo"
+                >
+            </div>
+
+            <span>Ashvad Mail</span>
+
         </div>
 
 
-        <button class="scheduled-nav" id="scheduledNav">
+        <button
+            class="scheduled-nav"
+            id="scheduledNav"
+        >
 
             <span>Scheduled</span>
 
-            <span class="count-badge" id="scheduledCount">
+            <span
+                class="count-badge"
+                id="scheduledCount"
+            >
                 0
             </span>
 
         </button>
 
     </header>
+
 
 
     <!-- ================= MAIN APP ================= -->
@@ -51,333 +79,360 @@
 
         <!-- ================= COMPOSE VIEW ================= -->
 
-        <section class="compose-view" id="composeView">
+        <section
+            class="compose-view"
+            id="composeView"
+        >
+
+
+            <!-- PAGE HEADING -->
 
             <div class="page-heading">
 
-                <div>
+                <h1>New Scheduled Email</h1>
 
-                    <h1>New Scheduled Email</h1>
-
-                    <p>
-                        Compose your email and choose when it should be sent.
-                    </p>
-
-                </div>
+                <p>
+                    Compose your email and choose when it should be sent.
+                </p>
 
             </div>
 
 
-            <!-- ================= EMAIL COMPOSER ================= -->
 
-            <div class="composer-card">
+            <!-- ================= TWO COLUMN LAYOUT ================= -->
 
-
-                <!-- RECIPIENT -->
-
-                <div class="form-group">
-
-                    <label>
-                        To
-                    </label>
+            <div class="compose-layout">
 
 
-                    <div class="recipient-box" id="recipientBox">
+                <!-- ======================================
+                     LEFT SIDE EMAIL COMPOSER
+                ======================================= -->
 
-                        <div id="recipientChips" class="recipient-chips"></div>
+                <div class="composer-card">
+                    
+
+
+                    <!-- RECIPIENT -->
+
+                    <div class="form-group recipient-group">
+
+                        <label>To</label>
+
+
+                        <div
+                            class="recipient-box"
+                            id="recipientBox"
+                        >
+
+                            <div
+                                id="recipientChips"
+                                class="recipient-chips"
+                            ></div>
+
+
+                            <input
+                                type="email"
+                                id="recipientInput"
+                                placeholder="Type an email address..."
+                            >
+
+                        </div>
+
+
+                        <div class="recipient-actions">
+
+                            <button
+                                type="button"
+                                id="toggleCc"
+                                class="text-button"
+                            >
+                                CC
+                            </button>
+
+
+                            <span>·</span>
+
+
+                            <button
+                                type="button"
+                                id="toggleBcc"
+                                class="text-button"
+                            >
+                                BCC
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- CC -->
+
+                    <div
+                        class="form-group hidden"
+                        id="ccSection"
+                    >
+
+                        <label>CC</label>
+
+                        <div class="recipient-box" id="ccBox">
+
+        <div
+            id="ccChips"
+            class="recipient-chips"
+        ></div>
+
+        <input
+            type="email"
+            id="ccInput"
+            placeholder="Add CC recipients..."
+        >
+
+    </div>
+
+</div>
+
+
+
+                    <!-- BCC -->
+
+                    <div
+                        class="form-group hidden"
+                        id="bccSection"
+                    >
+
+                        <label>BCC</label>
+
+    <div class="recipient-box" id="bccBox">
+
+        <div
+            id="bccChips"
+            class="recipient-chips"
+        ></div>
+
+        <input
+            type="email"
+            id="bccInput"
+            placeholder="Add BCC recipients..."
+        >
+
+    </div>
+
+</div>
+
+
+                    <!-- SUBJECT -->
+
+                    <div class="form-group">
+
+                        <label>Subject</label>
+
+                        <input
+                            type="text"
+                            class="form-input"
+                            id="subjectInput"
+                            placeholder="Enter email subject"
+                        >
+
+                    </div>
+
+
+
+                    <!-- MESSAGE -->
+
+                    <div class="form-group message-group">
+
+                        <label>Message</label>
+
+
+                        <div class="editor-container">
+
+
+                            <!-- TOOLBAR -->
+
+                            <div class="editor-toolbar">
+
+                                <button
+                                    type="button"
+                                    data-command="bold"
+                                    title="Bold"
+                                >
+                                    <strong>B</strong>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    data-command="italic"
+                                    title="Italic"
+                                >
+                                    <em>I</em>
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    data-command="underline"
+                                    title="Underline"
+                                >
+                                    <u>U</u>
+                                </button>
+
+
+                                <span class="toolbar-divider"></span>
+
+
+                                <button
+                                    type="button"
+                                    data-command="insertUnorderedList"
+                                >
+                                    • List
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    data-command="insertOrderedList"
+                                >
+                                    1. List
+                                </button>
+
+
+                                <span class="toolbar-divider"></span>
+
+
+                                <button
+                                    type="button"
+                                    id="linkButton"
+                                >
+                                    🔗
+                                </button>
+
+                            </div>
+
+
+
+                            <!-- MESSAGE EDITOR -->
+
+                            <div
+                                class="message-editor"
+                                id="messageEditor"
+                                contenteditable="true"
+                                data-placeholder="Write your email..."
+                            ></div>
+
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- ATTACHMENT -->
+
+                    <div class="attachment-section">
+
+                        <label
+                            for="attachmentInput"
+                            class="attachment-button"
+                        >
+
+                            <span>📎</span>
+
+                            <span>Attach files</span>
+
+                        </label>
 
 
                         <input
-                            type="email"
-                            id="recipientInput"
-                            placeholder="Type an email address..."
+                            type="file"
+                            id="attachmentInput"
+                            multiple
+                            hidden
                         >
 
-                    </div>
-
-
-                    <div class="recipient-actions">
-
-                        <button
-                            type="button"
-                            id="toggleCc"
-                            class="text-button"
-                        >
-                            CC
-                        </button>
-
-
-                        <span>·</span>
-
-
-                        <button
-                            type="button"
-                            id="toggleBcc"
-                            class="text-button"
-                        >
-                            BCC
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <!-- CC -->
-
-                <div class="form-group hidden" id="ccSection">
-
-                    <label>
-                        CC
-                    </label>
-
-
-                    <input
-                        type="email"
-                        class="form-input"
-                        id="ccInput"
-                        placeholder="Add CC recipients"
-                    >
-
-                </div>
-
-
-                <!-- BCC -->
-
-                <div class="form-group hidden" id="bccSection">
-
-                    <label>
-                        BCC
-                    </label>
-
-
-                    <input
-                        type="email"
-                        class="form-input"
-                        id="bccInput"
-                        placeholder="Add BCC recipients"
-                    >
-
-                </div>
-
-
-                <!-- SUBJECT -->
-
-                <div class="form-group">
-
-                    <label>
-                        Subject
-                    </label>
-
-
-                    <input
-                        type="text"
-                        class="form-input"
-                        id="subjectInput"
-                        placeholder="Enter email subject"
-                    >
-
-                </div>
-
-
-                <!-- MESSAGE -->
-
-                <div class="form-group">
-
-                    <label>
-                        Message
-                    </label>
-
-
-                    <div class="editor-container">
-
-
-                        <!-- TOOLBAR -->
-
-                        <div class="editor-toolbar">
-
-                            <button
-                                type="button"
-                                data-command="bold"
-                                title="Bold"
-                            >
-                                <strong>B</strong>
-                            </button>
-
-
-                            <button
-                                type="button"
-                                data-command="italic"
-                                title="Italic"
-                            >
-                                <em>I</em>
-                            </button>
-
-
-                            <button
-                                type="button"
-                                data-command="underline"
-                                title="Underline"
-                            >
-                                <u>U</u>
-                            </button>
-
-
-                            <span class="toolbar-divider"></span>
-
-
-                            <button
-                                type="button"
-                                data-command="insertUnorderedList"
-                                title="Bullet List"
-                            >
-                                • List
-                            </button>
-
-
-                            <button
-                                type="button"
-                                data-command="insertOrderedList"
-                                title="Numbered List"
-                            >
-                                1. List
-                            </button>
-
-
-                            <span class="toolbar-divider"></span>
-
-
-                            <button
-                                type="button"
-                                id="linkButton"
-                                title="Insert Link"
-                            >
-                                🔗
-                            </button>
-
-                        </div>
-
-
-                        <!-- EDITOR -->
 
                         <div
-                            class="message-editor"
-                            id="messageEditor"
-                            contenteditable="true"
-                            data-placeholder="Write your email..."
+                            id="attachmentList"
+                            class="attachment-list"
                         ></div>
 
-
                     </div>
+
 
                 </div>
 
 
-                <!-- ATTACHMENTS -->
 
-                <div class="attachment-section">
+                <!-- ======================================
+                     RIGHT SIDE SCHEDULE CARD
+                ======================================= -->
 
-                    <label
-                        for="attachmentInput"
-                        class="attachment-button"
-                    >
-
-                        <span>📎</span>
-
-                        <span>
-                            Attach files
-                        </span>
-
-                    </label>
+                <div class="schedule-card">
 
 
-                    <input
-                        type="file"
-                        id="attachmentInput"
-                        multiple
-                        hidden
-                    >
+                    <!-- SCHEDULE HEADING -->
+
+                    <div class="schedule-title">
+
+                        <div class="schedule-icon">
+                            📅
+                        </div>
 
 
-                    <div
-                        id="attachmentList"
-                        class="attachment-list"
-                    ></div>
+                        <div>
 
-                </div>
+                            <h2>
+                                Schedule
+                            </h2>
 
+                            <p>
+                                Choose when this email should be sent.
+                            </p>
 
-                <!-- DIVIDER -->
-
-                <div class="section-divider"></div>
-
-
-                <!-- ================= SCHEDULE ================= -->
-
-                <div class="schedule-section">
-
-
-                    <div class="schedule-heading">
-
-                        <h2>
-                            Schedule
-                        </h2>
-
-                        <p>
-                            Choose when this email should be sent.
-                        </p>
+                        </div>
 
                     </div>
 
 
-                    <!-- DATE + TIME -->
 
-                    <div class="schedule-grid">
+                    <!-- DATE -->
 
+                    <div class="form-group">
 
-                        <div class="form-group">
+                        <label>Date</label>
 
-                            <label>
-                                Date
-                            </label>
-
-
-                            <input
-                                type="date"
-                                class="form-input"
-                                id="scheduleDate"
-                            >
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>
-                                Time
-                            </label>
-
-
-                            <input
-                                type="time"
-                                class="form-input"
-                                id="scheduleTime"
-                            >
-
-                        </div>
-
+                        <input
+                            type="date"
+                            class="form-input"
+                            id="scheduleDate"
+                        >
 
                     </div>
+
+
+
+                    <!-- TIME -->
+
+                    <div class="form-group">
+
+                        <label>Time</label>
+
+                        <input
+                            type="time"
+                            class="form-input"
+                            id="scheduleTime"
+                        >
+
+                    </div>
+
 
 
                     <!-- TIMEZONE -->
 
                     <div class="form-group timezone-group">
 
-                        <label>
-                            Timezone
-                        </label>
-
+                        <label>Timezone</label>
 
                         <select
                             id="timezone"
@@ -405,46 +460,40 @@
                     </div>
 
 
-                    <!-- SCHEDULE CONFIRMATION -->
+
+                    <!-- CONFIRMATION -->
 
                     <div
                         class="schedule-confirmation"
                         id="scheduleConfirmation"
                     >
-
-                        🕐 Select a date and time
-
+                        ◷ Select a date and time
                     </div>
 
 
-                </div>
+
+                    <!-- BUTTONS -->
+
+                    <div class="action-buttons">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            id="previewButton"
+                        >
+                            ◉ Preview
+                        </button>
 
 
-                <!-- ================= ACTION BUTTONS ================= -->
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            id="scheduleButton"
+                        >
+                            ✈ Schedule Email
+                        </button>
 
-                <div class="action-buttons">
-
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        id="previewButton"
-                    >
-
-                        Preview
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        id="scheduleButton"
-                    >
-
-                        Schedule Email
-
-                    </button>
+                    </div>
 
 
                 </div>
@@ -456,82 +505,105 @@
 
 
 
-        <!-- ================= SCHEDULED VIEW ================= -->
+        <!-- ================= SCHEDULED EMAILS VIEW ================= -->
+        <section class="scheduled-view hidden" id="scheduledView">
 
-        <section
-            class="scheduled-view hidden"
-            id="scheduledView"
-        >
+            <div class="scheduled-top">
+                <button class="back-button" id="backButton">← Back</button>
 
+                <div class="scheduled-heading">
+                    <h1>Sent Emails</h1>
+                    <p>View and manage your sent and scheduled emails.</p>
+                </div>
+            </div>
 
-            <div class="scheduled-header">
+            <div class="sent-dashboard">
 
-                <button
-                    class="back-button"
-                    id="backButton"
-                >
+                <div class="sent-toolbar">
+                    <div class="summary-card">
+                        <div class="summary-icon">✈</div>
 
-                    ← Back
+                        <div class="summary-total">
+                            <span>Total Sent</span>
+                            <strong id="totalSentCount">0</strong>
+                            <small>Emails</small>
+                        </div>
 
-                </button>
+                        <div class="summary-divider"></div>
 
+                        <div class="summary-stats">
+                            <div>
+                                <span class="stat-dot delivered-dot"></span>
+                                <span>Delivered</span>
+                                <strong id="deliveredCount">0</strong>
+                            </div>
 
-                <div>
+                            <div>
+                                <span class="stat-dot undelivered-dot"></span>
+                                <span>Undelivered</span>
+                                <strong id="undeliveredCount">0</strong>
+                            </div>
+                        </div>
+                    </div>
 
-                    <h1>
-                        Scheduled Emails
-                    </h1>
+                    <div class="table-tools">
+                        <div class="search-box">
+                            <span>⌕</span>
+                            <input
+                                type="search"
+                                id="emailSearch"
+                                placeholder="Search sent emails..."
+                                autocomplete="off"
+                            >
+                        </div>
 
-                    <p>
-                        Manage your upcoming emails.
-                    </p>
+                        <button class="filter-button" id="filterButton" type="button">
+                            <span>▽</span>
+                            <span id="filterLabel">Filter</span>
+                        </button>
+                    </div>
+                </div>
 
+                <div class="sent-table-card">
+                    <div class="sent-table-scroll">
+                        <table class="sent-table">
+                            <thead>
+                                <tr>
+                                    <th>Email Details</th>
+                                    <th class="sortable-heading">
+                                        <button type="button" id="sortDateButton">
+                                            Sent On <span id="sortArrow">↕</span>
+                                        </button>
+                                    </th>
+                                    <th>Status</th>
+                                    <th>Recipient</th>
+                                    <th class="action-heading"></th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="scheduledList"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-empty hidden" id="emptyState">
+                        <div class="empty-icon">✉</div>
+                        <h2>No emails found</h2>
+                        <p>Scheduled or sent emails will appear here.</p>
+                        <button class="btn btn-primary" id="createEmailButton">Create Email</button>
+                    </div>
+
+                    <div class="table-footer">
+                        <span id="tableInfo">Showing 0 to 0 of 0 emails</span>
+
+                        <div class="pagination" id="pagination">
+                            <button type="button" class="page-arrow" id="prevPage" aria-label="Previous page">‹</button>
+                            <div id="pageNumbers" class="page-numbers"></div>
+                            <button type="button" class="page-arrow" id="nextPage" aria-label="Next page">›</button>
+                        </div>
+                    </div>
                 </div>
 
             </div>
-
-
-            <!-- SCHEDULED LIST -->
-
-            <div
-                class="scheduled-list"
-                id="scheduledList"
-            ></div>
-
-
-            <!-- EMPTY STATE -->
-
-            <div
-                class="empty-state"
-                id="emptyState"
-            >
-
-                <div class="empty-icon">
-                    ✉
-                </div>
-
-
-                <h2>
-                    No scheduled emails
-                </h2>
-
-
-                <p>
-                    Your scheduled emails will appear here.
-                </p>
-
-
-                <button
-                    class="btn btn-primary"
-                    id="createEmailButton"
-                >
-
-                    Create Email
-
-                </button>
-
-            </div>
-
 
         </section>
 
@@ -553,28 +625,20 @@
         <div class="modal-content">
 
 
-            <!-- MODAL HEADER -->
-
             <div class="modal-header">
 
-                <h2>
-                    Email Preview
-                </h2>
+                <h2>Email Preview</h2>
 
 
                 <button
                     class="close-button"
                     id="closePreview"
                 >
-
                     ×
-
                 </button>
 
             </div>
 
-
-            <!-- PREVIEW BODY -->
 
             <div
                 class="preview-body"
@@ -582,18 +646,13 @@
             ></div>
 
 
-            <!-- MODAL FOOTER -->
-
             <div class="modal-footer">
-
 
                 <button
                     class="btn btn-secondary"
                     id="editButton"
                 >
-
                     Edit
-
                 </button>
 
 
@@ -601,11 +660,8 @@
                     class="btn btn-primary"
                     id="confirmScheduleButton"
                 >
-
                     Schedule Email
-
                 </button>
-
 
             </div>
 
@@ -620,5 +676,7 @@
 
     <script src="script.js"></script>
 
+
 </body>
+
 </html>
